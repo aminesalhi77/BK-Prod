@@ -1,0 +1,64 @@
+{
+  "feature_columns": [
+    "palettes_entrees",
+    "tonnage_total_kg",
+    "tonnage_moyen_palette",
+    "attente_moyenne_h",
+    "attente_max_h",
+    "nb_alertes_8h",
+    "type_cb_simple_parage",
+    "type_cb_double_parage",
+    "type_ct_simple_parage",
+    "type_longe_precuit",
+    "type_miette",
+    "type_morcele",
+    "stock_fin_jour",
+    "palettes_alimentees_ligne",
+    "ligne_5_21",
+    "ligne_5_22",
+    "ligne_400",
+    "ligne_1_5",
+    "ligne_manuel",
+    "nb_articles_differents",
+    "nb_cycles_autoclave",
+    "duree_moyenne_cycle",
+    "duree_max_cycle",
+    "nb_autoclaves_utilises",
+    "boites_emballees",
+    "nb_lots_emballage",
+    "jour_semaine",
+    "est_lundi",
+    "est_vendredi"
+  ],
+  "training_rows": 79,
+  "regression_targets": [
+    "palettes_demain",
+    "tonnage_demain",
+    "cycles_demain",
+    "boites_demain"
+  ],
+  "classification_targets": [
+    "risque_alertes"
+  ],
+  "results": {
+    "palettes_demain": {
+      "mae": 5.85,
+      "r2": -0.352
+    },
+    "tonnage_demain": {
+      "mae": 1804.5,
+      "r2": -0.115
+    },
+    "cycles_demain": {
+      "mae": 1.19,
+      "r2": -1.096
+    },
+    "boites_demain": {
+      "mae": 3700.29,
+      "r2": -1.018
+    },
+    "risque_alertes": {
+      "accuracy": 1.0
+    }
+  }
+}

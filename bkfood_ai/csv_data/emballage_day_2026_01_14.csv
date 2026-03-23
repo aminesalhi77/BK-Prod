@@ -1,0 +1,5 @@
+﻿str_code,autoclave_id,article,total_boxes,cheffe_emballage_matricule,recorded_at,source_file
+STR-WT5EGM3Y,Autoclave 1,Thon Entier à l'Huile,3369,5001,2026-01-14 12:06:43,production-day-2026-01-14.xlsx
+STR-2896Q6F1,Autoclave 2,Thon Entier au Naturel,871,5002,2026-01-14 13:33:41,production-day-2026-01-14.xlsx
+STR-H5UN28B3,Autoclave 1,Thon Emietté à la Tomate,2853,5001,2026-01-14 13:50:17,production-day-2026-01-14.xlsx
+STR-E6G09MG5,Autoclave 2,Thon en Morceaux au Naturel,1616,5002,2026-01-14 11:08:07,production-day-2026-01-14.xlsx

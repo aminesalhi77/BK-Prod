@@ -1,0 +1,6 @@
+﻿str_code,autoclave_id,article,total_boxes,cheffe_emballage_matricule,recorded_at,source_file
+STR-MWE173SO,Autoclave 5,Thon Emietté à la Tomate,1933,5001,2025-12-26 12:37:50,production-day-2025-12-26.xlsx
+STR-8Z73MAZL,Autoclave 2,Thon Emietté à la Tomate,3144,5002,2025-12-26 12:08:42,production-day-2025-12-26.xlsx
+STR-YYGRCTDY,Autoclave 5,Thon Emietté à l'Huile,2132,5002,2025-12-26 15:11:13,production-day-2025-12-26.xlsx
+STR-KSFUBHDX,Autoclave 3,Thon Emietté à la Tomate,2373,5002,2025-12-26 14:55:14,production-day-2025-12-26.xlsx
+STR-K9MJX28R,Autoclave 2,Thon en Morceaux au Naturel,3057,5002,2025-12-26 13:43:39,production-day-2025-12-26.xlsx

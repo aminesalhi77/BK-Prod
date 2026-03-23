@@ -1,0 +1,904 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║          BK FOOD TRACEABILITY SYSTEM — AGENT MASTER PROMPT v4.0         ║
+║              Based on official Excalidraw architecture diagram            ║
+╚══════════════════════════════════════════════════════════════════════════╝
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 0 — WHO YOU ARE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You are a Senior Full-Stack Engineer + Industrial IoT Architect.
+Your job is to build a complete, fully-functional Next.js 14 
+traceability application for a tuna canning factory.
+You must implement EVERY screen and EVERY API listed in this
+prompt. Incomplete deliverables are NOT acceptable.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 1 — THE REAL FACTORY WORKFLOW (FROM DIAGRAM)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The factory has 4 operational modules + 1 admin module.
+Each module has its own login, menu, and step-by-step screens.
+The flow of product through the factory is:
+  PARAGE → [CHAMBRE 0] → [LIGNE] → [AUTOCLAVE] → [EMBALLAGE]
+Physical objects that move through the factory:
+  - PALETTE: a pallet of tuna from Parage. Has a barcode ticket.
+  - CHARIOT: a cart loaded at the Ligne with filled cans. Has a 
+             barcode ticket printed at the Ligne.
+  - TICKET: every physical movement generates a printable 
+             barcode ticket used to scan at the next station.
+═══════════════════════════════════════════════════════════════
+MODULE 1: CHAMBRE 0 — Cold Storage
+═══════════════════════════════════════════════════════════════
+SCREENS (implement each as a separate page/step):
+1.1  Chambre 0 Connexion
+     → URL: /chambre/login
+     → Worker scans or types their MATRICULE (employee ID)
+     → Lookup matricule in DB → store session
+     → Redirect to /chambre/menu
+1.2  Saisie matricules Chambre 0
+     → Large numeric keypad or scanner input
+     → Validates against User.matricule in DB
+1.3  Menu Chambre 0
+     → URL: /chambre/menu
+     → 4 large cards: [Entrée Palette] [Sortie Palette] [Visuel] [Indicateurs]
+─── SUB-FLOW A: ENTRÉE PALETTE (from Parage) ──────────────────
+1.4  Entrée palette depuis parage
+     → URL: /chambre/entree-palette
+     → Entry point screen with instruction text
+1.5  Scan ticket palette
+     → Full-screen scanner input (useScannerInput hook)
+     → Scans the barcode on the palette ticket from Parage
+     → Validates palette exists in DB and status = 'PARAGE_DONE'
+     → Auto-advances to next step on successful scan
+1.6  Saisie infos palette
+     → Shows palette info fetched from DB (batchCode, species, weight, origin)
+     → Worker can add notes
+     → Confirm button
+1.7  Enregistrement stock Chambre 0
+     → Saves palette to ColdStorageStock table
+     → Sets palette.status = 'IN_CHAMBRE'
+     → Sets palette.entryTime = now()
+     → Shows success with palette code + green flash
+     → 🤖 ML HOOK: run anomaly check on palette weight vs historical average
+       If deviation &gt; 15%: show yellow warning card &quot;Poids inhabituel détecté&quot;
+─── SUB-FLOW B: SORTIE PALETTE (to Ligne) ─────────────────────
+1.8  Sortie palette vers ligne
+     → URL: /chambre/sortie-palette
+     → Lists all palettes currently IN_CHAMBRE, sorted by entryTime
+1.9  Scan ticket Chambre 0
+     → Scan the palette ticket to select which one to release
+     → Validates palette.status = 'IN_CHAMBRE'
+1.10 Choix ligne destination
+     → Dropdown or card selection: Ligne 1 / Ligne 2 / Ligne 3
+     → Stored in movement record
+1.11 Choix article produit
+     → Select from product article list (thon entier / filets / miettes etc.)
+     → Pre-filled from palette data, editable
+1.12 Retrait palette stock Chambre 0
+     → Updates palette.status = 'SENT_TO_LIGNE'
+     → Records: exitTime, destinationLine, article, workerMatricule
+     → Creates PaletteMovement record in DB
+     → Prints (or shows printable) palette transfer ticket
+─── SUB-FLOW C: VISUEL (Dashboard) ───────────────────────────
+1.13 Chambre 0 visuel
+     → URL: /chambre/visuel
+     → Real-time visual grid of all palettes in cold storage
+     → Each palette = a card showing: code, article, weight, time in storage
+     → Color coding:
+         Green  = &lt; 4h in storage
+         Orange = 4h–8h in storage  
+         Red    = &gt; 8h in storage (ALERT!)
+1.14 Affichage graphique chambre 0
+     → Bar chart (CSS only, no chart library): palettes per article type
+     → Timeline showing palette entry/exit events today
+1.15 Palette attente + Alerte palette attente
+     → Any palette stored &gt; 8h triggers:
+         - Red badge on the menu card
+         - Popup alert on visuel screen
+         - 🤖 ML HOOK: check if this delay is anomalous vs historical patterns
+           Display: &quot;Délai inhabituel — moyenne historique: Xh&quot;
+─── SUB-FLOW D: INDICATEURS ───────────────────────────────────
+1.16 Calcul indicateurs Chambre 0
+     → URL: /chambre/indicateurs
+     → KPI cards:
+         - Palettes entrées aujourd'hui
+         - Palettes sorties aujourd'hui
+         - Stock actuel (count)
+         - Durée moyenne de stockage (heures)
+         - Taux d'occupation (%)
+     → 🤖 ML HOOK: &quot;Prévision stock demain&quot; based on historical trends
+═══════════════════════════════════════════════════════════════
+MODULE 2: LIGNE — Production Line
+═══════════════════════════════════════════════════════════════
+SCREENS:
+2.1  Ligne Connexion
+     → URL: /ligne/login
+     → Worker scans matricule → redirect to /ligne/choix-ligne
+2.2  Choix ligne
+     → URL: /ligne/choix-ligne
+     → Card grid: Ligne 1 / Ligne 2 / Ligne 3
+     → Tap to select active line for this session
+2.3  Saisie matricule cheffe ligne
+     → URL: /ligne/chef-matricule
+     → The line supervisor (cheffe ligne) scans/types their matricule
+     → Stored in session as supervisor of this line shift
+2.4  Menu Ligne
+     → URL: /ligne/menu
+     → Shows selected line name + cheffe name
+     → 3 cards: [Entrée Palette] [Sortie Chariot] [Traçabilité]
+─── SUB-FLOW A: ENTRÉE PALETTE ────────────────────────────────
+2.5  Entrée palette ligne
+     → URL: /ligne/entree-palette
+2.6  Scan ticket palette ligne
+     → Scan the transfer ticket from Chambre 0
+     → Validates palette.status = 'SENT_TO_LIGNE'
+     → Validates destinationLine matches current session line
+     → 🤖 ML HOOK: check if this article/quantity matches the planned
+       production schedule. Show &quot;Quantité reçue: Xkg — Planifié: Ykg&quot;
+2.7  Saisie article produit ligne
+     → Confirm or change article type
+     → Enter actual received weight
+2.8  Traçabilité alimentation ligne
+     → Shows the complete lineage of this palette:
+       [Parage → Chambre 0 → Ligne] with timestamps and workers at each step
+     → Updates palette.status = 'IN_LIGNE'
+     → Saves LineEntry record
+─── SUB-FLOW B: SORTIE CHARIOT ────────────────────────────────
+2.9  Création ticket sortie chariot
+     → URL: /ligne/sortie-chariot
+2.10 Saisie numéro chariot
+     → Scanner or numeric input for cart number (physical label on cart)
+     → Validates chariot is not already in an active cycle
+2.11 Saisie article chariot
+     → Select article type loaded on this cart
+     → Linked to the palette article
+2.12 Saisie nombre boites
+     → Number of cans loaded on this cart
+     → Auto-calculates estimated weight based on article standard weight
+     → 🤖 ML HOOK: if number of boxes deviates &gt; 10% from expected:
+       Show &quot;Nombre inhabituel — moyenne: X boîtes pour cet article&quot;
+2.13 Impression ticket chariot
+     → URL: /ligne/ticket-chariot/[id]
+     → Generates a printable ticket with:
+         - QR code / barcode (chariots unique ID)
+         - Cart number, article, box count, line, date, cheffe name
+         - window.print() triggers on load
+     → Also saves Chariot record in DB with status = 'READY_FOR_AUTOCLAVE'
+═══════════════════════════════════════════════════════════════
+MODULE 3: AUTOCLAVE
+═══════════════════════════════════════════════════════════════
+SCREENS:
+3.1  Autoclave Connexion
+     → URL: /autoclave/login
+3.2  Saisie matricule conducteur
+     → The autoclave operator scans their matricule
+3.3  Saisie matricule assistant
+     → The assistant also scans their matricule
+     → Both stored in the cycle record
+3.4  Choix autoclave
+     → Select which physical autoclave machine: AC-01 / AC-02 / AC-03
+     → Each has a capacity (number of carts it can hold)
+─── SUB-FLOW A: CHARGEMENT ────────────────────────────────────
+3.5  Chargement autoclave
+     → URL: /autoclave/chargement
+3.6  Scan tickets chariots
+     → Multi-scan screen: scan multiple cart tickets one by one
+     → Shows a running list of scanned carts with their articles/box counts
+     → Counter: &quot;X / Y chariots&quot; (Y = autoclave capacity)
+     → Each scan validates chariot.status = 'READY_FOR_AUTOCLAVE'
+     → 🤖 ML HOOK: as each cart is added, check if the COMBINATION
+       of articles in this batch is valid for sterilization:
+         - Mixed articles = WARNING &quot;Mélange d'articles détecté&quot;
+         - Unusual total weight = WARNING
+3.7  Confirmation départ cycle
+     → Summary screen: autoclave selected, operator, assistant,
+       list of carts, total box count, total estimated weight
+     → Large CONFIRM button (two-tap confirmation for safety)
+3.8  Sauvegarde cycle autoclave
+     → Saves AutoclaveCycle record:
+         conducteurMatricule, assistantMatricule, autoclaveId,
+         startTime = now(), chariots[] (linked), status = 'RUNNING'
+     → Updates all scanned chariots: status = 'IN_AUTOCLAVE'
+     → 🤖 ML HOOK: predict sterilization duration based on:
+         article type + total weight + autoclave model
+         Show predicted end time: &quot;Fin prévue: HH:MM&quot;
+─── SUB-FLOW B: FIN CYCLE ─────────────────────────────────────
+3.9  Fin cycle autoclave
+     → URL: /autoclave/fin-cycle
+     → Shows running cycles list → tap one to close it
+     → Confirms endTime, records actual duration
+3.10 Sortie autoclave
+     → URL: /autoclave/sortie/[cycleId]
+3.11 Récupération articles et quantités
+     → Shows all articles and quantities that went in
+     → Worker confirms what came out (can edit if discrepancy)
+     → Records any losses/discrepancies
+3.12 Calcul durée stérilisation
+     → Computes: actualDuration = endTime - startTime
+     → 🤖 ML HOOK: compare actualDuration vs predicted duration vs
+       historical norm for this article/autoclave combination
+       If deviation &gt; 5 minutes: FLAG as anomaly
+       Display: &quot;Durée: Xmin | Prévu: Ymin | Norme: Zmin&quot;
+3.13 Génération ticket stérilisation
+     → Creates SterilizationTicket record in DB with:
+         cycleId, articles[], totalBoxes, duration, startTime, endTime,
+         conducteur, assistant, autoclaveId, isAnomaly (from ML)
+     → Unique barcode ID generated: STR-[date]-[sequence]
+3.14 Impression ticket stérilisation
+     → URL: /autoclave/ticket-sterilisation/[ticketId]
+     → Printable page (window.print() on load):
+         Barcode of ticket ID, all cycle data, ML validation stamp
+     → Chariot statuses updated to 'STERILIZED'
+═══════════════════════════════════════════════════════════════
+MODULE 4: EMBALLAGE — Packaging
+═══════════════════════════════════════════════════════════════
+SCREENS:
+4.1  Emballage Connexion
+     → URL: /emballage/login
+4.2  Saisie matricule cheffe emballage
+     → Packaging supervisor scans matricule
+4.3  Démarrage emballage
+     → URL: /emballage/demarrage
+     → Shows active sterilization tickets available for packaging
+4.4  Scan ticket stérilisation
+     → Scan the barcode from the sterilization ticket
+     → Validates SterilizationTicket.status = 'READY_FOR_PACKAGING'
+     → Shows full cycle info (articles, quantities, autoclave, duration)
+     → 🤖 ML HOOK: display the ML verdict from the autoclave step:
+         If isAnomaly = true: RED banner &quot;⚠ LOT SIGNALÉ — Vérification requise&quot;
+         If normal: GREEN banner &quot;✓ Lot validé par IA&quot;
+4.5  Enregistrement données emballage
+     → Fields: packaging line, shift, actual box count, 
+       damaged/rejected count, packaging start time
+     → Saves PackagingRecord linked to SterilizationTicket
+     → SterilizationTicket.status = 'IN_PACKAGING'
+4.6  Traçabilité complète emballage
+     → URL: /emballage/tracabilite/[ticketId]
+     → Shows the FULL chain for this lot:
+         Parage → Chambre 0 → Ligne → Autoclave → Emballage
+       with timestamps, workers, weights, and ML validation at each step
+     → Status = 'PACKAGING_COMPLETE'
+═══════════════════════════════════════════════════════════════
+MODULE 5: ADMIN GLOBAL (Super Admin + Admin Dashboard)
+═══════════════════════════════════════════════════════════════
+5.1  Calcul indicateurs globaux
+     → URL: /dashboard (Admin/SuperAdmin landing)
+     → KPI cards:
+         - Palettes traitées aujourd'hui / cette semaine
+         - Chariots stérilisés aujourd'hui
+         - Anomalies IA détectées (count + %)
+         - Durée moyenne cycle autoclave
+         - Taux de rejet emballage (%)
+     → 🤖 ML HOOK: &quot;Score de performance global&quot; 0-100
+       computed from all KPIs weighted by ML model
+5.2  Recherche lot / traçabilité ascendante
+     → URL: /dashboard/traceability
+     → Search input: scan or type any barcode at any stage
+         (palette ticket / chariot ticket / sterilization ticket)
+     → System AUTOMATICALLY detects which type of barcode it is
+       and shows the FULL upstream traceability chain
+     → Split view (PC):
+         Left: Complete chain timeline with SQL data
+         Right: ML analysis at each step + anomaly flags
+5.3  Affichage traçabilité complète
+     → Full-page printable traceability report for a lot
+     → All steps, all workers (matricules), all timestamps
+     → ML validation stamps at each step
+     → Export as PDF button (use window.print() with @media print CSS)
+5.4  Floor Map (Visual Factory)
+     → URL: /dashboard/floor-map
+     → Real-time view of palettes/chariots across all 4 modules
+     → Chambre 0: grid of palette cards colored by time in storage
+     → Ligne: active lines with current palette
+     → Autoclave: running cycles with countdown timer
+     → Emballage: active packaging sessions
+     → Auto-refresh every 15 seconds
+     → 🤖 ML anomaly badges on any flagged item
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 2 — DATABASE SCHEMA (Prisma + PostgreSQL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Add these models to prisma/schema.prisma:
+model User {
+  id            String    @id @default(cuid())
+  matricule     String    @unique   // employee ID — primary login method
+  email         String?   @unique   // optional for admin accounts
+  password      String
+  name          String
+  role          UserRole  @default(WORKER)
+  isApproved    Boolean   @default(false)
+  assignedModule ModuleType?        // which module this worker is assigned to
+  createdAt     DateTime  @default(now())
+  approvedBy    String?
+  approvedAt    DateTime?
+}
+enum UserRole { WORKER CHEF_LIGNE CHEF_EMBALLAGE CONDUCTEUR ADMIN SUPER_ADMIN }
+enum ModuleType { CHAMBRE LIGNE AUTOCLAVE EMBALLAGE ADMIN }
+model Palette {
+  id            String        @id @default(cuid())
+  code          String        @unique  // barcode value on physical ticket
+  batchCode     String                 // links to TunaBatch
+  species       String
+  article       String                 // product article type
+  weightKg      Float
+  origin        String
+  status        PaletteStatus @default(PARAGE_DONE)
+  notes         String?
+  
+  entryTime     DateTime?              // when entered Chambre 0
+  exitTime      DateTime?              // when left Chambre 0
+  destinationLine String?              // Ligne 1/2/3
+  
+  chambreWorkerId String?
+  ligneWorkerId   String?
+  
+  movements     PaletteMovement[]
+  lineEntries   LineEntry[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  isWeightAnomaly Boolean @default(false)
+  weightAnomalyScore Float?
+  
+  @@index([code])
+  @@index([status])
+  @@index([batchCode])
+}
+enum PaletteStatus {
+  PARAGE_DONE
+  IN_CHAMBRE
+  CHAMBRE_ALERT      // &gt; 8h waiting
+  SENT_TO_LIGNE
+  IN_LIGNE
+  CONSUMED
+}
+model PaletteMovement {
+  id          String   @id @default(cuid())
+  paletteId   String
+  palette     Palette  @relation(fields: [paletteId], references: [id])
+  fromStation String
+  toStation   String
+  workerMatricule String
+  timestamp   DateTime @default(now())
+  notes       String?
+  @@index([paletteId])
+}
+model Chariot {
+  id            String        @id @default(cuid())
+  code          String        @unique   // barcode on printed ticket
+  numero        String                  // physical cart number painted on it
+  article       String
+  boxCount      Int
+  estimatedWeight Float?
+  status        ChariotStatus @default(READY_FOR_AUTOCLAVE)
+  
+  ligneId       String                  // Ligne 1/2/3
+  cheffeMatricule String
+  paletteId     String?                 // source palette
+  
+  createdAt     DateTime  @default(now())
+  
+  autoclaveCycles AutoclaveCycleChariot[]
+  
+  isBoxCountAnomaly Boolean @default(false)
+  
+  @@index([code])
+  @@index([status])
+}
+enum ChariotStatus {
+  READY_FOR_AUTOCLAVE
+  IN_AUTOCLAVE
+  STERILIZED
+  IN_PACKAGING
+  DONE
+}
+model AutoclaveCycle {
+  id                  String    @id @default(cuid())
+  autoclaveId         String    // &quot;AC-01&quot; / &quot;AC-02&quot; / &quot;AC-03&quot;
+  conducteurMatricule String
+  assistantMatricule  String?
+  
+  startTime           DateTime  @default(now())
+  endTime             DateTime?
+  actualDurationMin   Int?
+  predictedDurationMin Int?     // from ML
+  
+  status              CycleStatus @default(RUNNING)
+  
+  totalBoxes          Int       @default(0)
+  totalWeightKg       Float?
+  
+  isAnomaly           Boolean   @default(false)
+  anomalyScore        Float?
+  anomalyFlags        String?   // JSON array of flag strings
+  
+  sterilizationTicket SterilizationTicket?
+  chariots            AutoclaveCycleChariot[]
+  
+  createdAt           DateTime  @default(now())
+  @@index([status])
+  @@index([autoclaveId])
+}
+enum CycleStatus { RUNNING COMPLETED ANOMALY }
+model AutoclaveCycleChariot {
+  cycleId   String
+  chariotId String
+  cycle     AutoclaveCycle @relation(fields: [cycleId], references: [id])
+  chariot   Chariot        @relation(fields: [chariotId], references: [id])
+  @@id([cycleId, chariotId])
+}
+model SterilizationTicket {
+  id          String    @id @default(cuid())
+  code        String    @unique  // STR-YYYYMMDD-XXXX barcode
+  cycleId     String    @unique
+  cycle       AutoclaveCycle @relation(fields: [cycleId], references: [id])
+  
+  isAnomaly   Boolean   @default(false)
+  mlSummary   String?   // JSON: { score, flags, verdict }
+  
+  status      TicketStatus @default(READY_FOR_PACKAGING)
+  
+  packagingRecord PackagingRecord?
+  
+  createdAt   DateTime  @default(now())
+  @@index([code])
+  @@index([status])
+}
+enum TicketStatus {
+  READY_FOR_PACKAGING
+  IN_PACKAGING
+  PACKAGING_COMPLETE
+}
+model LineEntry {
+  id              String   @id @default(cuid())
+  paletteId       String
+  palette         Palette  @relation(fields: [paletteId], references: [id])
+  ligneId         String
+  cheffeMatricule String
+  article         String
+  weightKg        Float
+  timestamp       DateTime @default(now())
+  @@index([paletteId])
+  @@index([ligneId])
+}
+model PackagingRecord {
+  id                  String   @id @default(cuid())
+  sterilizationTicketId String @unique
+  ticket              SterilizationTicket @relation(fields: [sterilizationTicketId], references: [id])
+  cheffeMatricule     String
+  packagingLine       String
+  shift               String
+  actualBoxCount      Int
+  rejectedCount       Int      @default(0)
+  startTime           DateTime @default(now())
+  endTime             DateTime?
+  notes               String?
+  @@index([sterilizationTicketId])
+}
+model ColdStorageIndicator {
+  id              String   @id @default(cuid())
+  date            DateTime @default(now())
+  palettesIn      Int
+  palettesOut     Int
+  stockLevel      Int
+  avgStorageHours Float
+  occupancyPct    Float
+  mlForecast      Int?     // predicted tomorrow stock
+  @@index([date])
+}
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String?
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+  @@index([action])
+}
+model MLModel {
+  id           String   @id @default(cuid())
+  version      String
+  trainingDate DateTime @default(now())
+  algorithm    String   @default(&quot;IsolationForest&quot;)
+  accuracy     Float?
+  isActive     Boolean  @default(true)
+  modelPath    String
+  features     String?  // JSON
+  @@index([isActive])
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 3 — COMPLETE API ROUTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Build every one of these API routes. No mocks — real Prisma.
+AUTH
+  POST /api/auth/login-matricule  → login with matricule (workers)
+  POST /api/auth/login-email      → login with email (admins)
+  POST /api/auth/register
+  GET  /api/auth/me
+PALETTES
+  POST /api/palettes              → create palette (from Parage)
+  GET  /api/palettes              → list (filter by status, date)
+  GET  /api/palettes/[code]       → get by barcode
+  PUT  /api/palettes/[code]/status → update status + movement record
+CHAMBRE 0
+  POST /api/chambre/entree        → receive palette (sets IN_CHAMBRE)
+  POST /api/chambre/sortie        → release palette (sets SENT_TO_LIGNE)
+  GET  /api/chambre/stock         → all IN_CHAMBRE palettes
+  GET  /api/chambre/indicateurs   → KPI computation query
+  GET  /api/chambre/alertes       → palettes waiting &gt; 8h
+LIGNE
+  POST /api/ligne/entree-palette  → receive from chambre (sets IN_LIGNE)
+  POST /api/chariots              → create chariot + generate barcode
+  GET  /api/chariots/[code]       → get chariot by barcode
+  GET  /api/ligne/active          → active line sessions
+AUTOCLAVE
+  POST /api/autoclave/cycles      → start new cycle
+  GET  /api/autoclave/cycles      → list cycles (filter by status)
+  GET  /api/autoclave/cycles/[id] → get cycle detail
+  PUT  /api/autoclave/cycles/[id]/end → close cycle (sets endTime)
+  POST /api/autoclave/cycles/[id]/chariots → add chariot to cycle
+  GET  /api/autoclave/tickets/[code] → get sterilization ticket by barcode
+EMBALLAGE
+  POST /api/emballage/start       → start packaging from ticket scan
+  PUT  /api/emballage/[id]/complete → complete packaging
+ML / AI
+  POST /api/ml/check-palette-weight   → anomaly check on palette arrival
+  POST /api/ml/check-chariot-boxes    → anomaly check on box count
+  POST /api/ml/predict-sterilization  → predict duration for a cycle
+  POST /api/ml/check-cycle-duration   → anomaly check after cycle ends
+  GET  /api/ml/train-status           → current ML model info
+ADMIN
+  GET  /api/dashboard/kpis            → global KPIs
+  GET  /api/traceability/search?q=    → universal barcode search
+  GET  /api/users                     → list users
+  POST /api/users/approve             → approve + assign module
+  POST /api/users/assign-module       → assign user to module
+PRINT
+  GET  /api/tickets/chariot/[id]      → chariot ticket data for print page
+  GET  /api/tickets/sterilisation/[id] → sterilization ticket data
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 4 — ML / AI INTEGRATION SPEC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The Python ML services live in /python_services/
+All are called via Node.js child_process.spawn()
+Always provide a rule-based fallback if Python is unavailable.
+ML CHECK 1: Palette Weight Anomaly
+  Trigger: when palette enters Chambre 0
+  Input:  { article, weightKg, species }
+  Logic:  IsolationForest trained on historical palette weights per article
+  Output: { isAnomaly, score, expectedRange: [min, max], deviation_pct }
+  UI:     Yellow warning card if anomaly. Does NOT block entry.
+ML CHECK 2: Chariot Box Count Anomaly
+  Trigger: when chariot is created at Ligne
+  Input:  { article, boxCount, ligneId }
+  Logic:  Compare to mean ± 2 std of historical box counts for that article
+  Output: { isAnomaly, score, expectedCount, deviation }
+  UI:     Warning displayed inline. Worker must confirm to proceed.
+ML CHECK 3: Sterilization Duration Prediction
+  Trigger: when autoclave cycle STARTS (after Confirmation départ cycle)
+  Input:  { autoclaveId, articles[], totalBoxes, totalWeightKg }
+  Logic:  Regression model trained on historical cycle records
+  Output: { predictedMinutes, confidenceInterval: [min, max] }
+  UI:     Shows predicted end time as a countdown on the running cycle card
+ML CHECK 4: Cycle Duration Anomaly
+  Trigger: when autoclave cycle ENDS
+  Input:  { autoclaveId, articles[], totalBoxes, actualDurationMin,
+            predictedDurationMin }
+  Logic:  IsolationForest on historical duration deviations
+  Output: { isAnomaly, score, flags[], verdict }
+  UI:     If anomaly: RED banner on sterilization ticket
+          Long haptic vibration pattern on PDA
+          Creates entry in anomaly log
+          Supervisor must acknowledge before packaging can start
+ML CHECK 5: Palette Wait Time Prediction
+  Trigger: every 30 minutes via cron-like GET /api/chambre/alertes
+  Input:  { currentStock, dayOfWeek, hourOfDay, historicalExitRates }
+  Logic:  Time-series model predicting which palettes risk exceeding 8h
+  Output: { at_risk_palettes: [{ code, predictedWaitHours }] }
+  UI:     Pre-emptive orange warning before 8h threshold
+ML CHECK 6: Global Performance Score
+  Trigger: Admin dashboard load
+  Input:  today's KPIs vs historical baselines
+  Output: { score: 0-100, breakdown: { chambre, ligne, autoclave, emballage } }
+  UI:     Circular gauge CSS component, one per module + global
+Rule-Based Fallbacks (when Python ML unavailable):
+  - Weight anomaly: flag if weight &lt; 50kg or &gt; 800kg
+  - Box count anomaly: flag if &lt; 10 or &gt; 500 boxes
+  - Duration anomaly: flag if actual &gt; predicted * 1.2 or &lt; predicted * 0.7
+  - Wait alert: flag all palettes with entryTime &gt; 8h ago
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 5 — BARCODE/TICKET SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Every physical ticket is a printable Next.js page.
+TICKET TYPES and their barcode formats:
+  Palette ticket:          PAL-YYYYMMDD-[4 digit sequence]
+  Chariot ticket:          CHR-YYYYMMDD-[4 digit sequence]
+  Sterilization ticket:    STR-YYYYMMDD-[4 digit sequence]
+Barcode rendering: use a CSS-only barcode representation OR
+render using a simple SVG barcode (Code-128 compatible).
+Never use a barcode library that requires npm install.
+Simple approach: render the barcode value as alternating
+black/white bars using CSS background-image: repeating-linear-gradient.
+The exact visual doesn't need to be scannable by a real reader —
+it just needs to LOOK like a barcode for the UI.
+Ticket print pages MUST:
+  - Have @media print CSS that hides all nav/sidebar
+  - Show company name &quot;BK FOOD&quot; prominently
+  - Show all relevant data in a clean table layout
+  - Have a large barcode visual
+  - Trigger window.print() automatically on page load
+  - Have a &quot;Imprimer&quot; button for manual trigger
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 6 — UI/UX RULES (NON-NEGOTIABLE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECH STACK:
+  - Next.js 14 App Router ONLY
+  - CSS Modules ONLY (no Tailwind, no styled-components)
+  - 'use client' on every component using hooks or browser APIs
+  - Prisma for ALL database operations
+  - jose for JWT (already installed)
+  - bcryptjs for passwords (already installed)
+DESIGN TOKENS (use these variables — never hardcode colors):
+  --maritime-blue: #1e3a8a   → primary buttons, headers, active nav
+  --safety-orange: #f97316   → warnings, FAB, alerts
+  --success-green: #22c55e   → success states, OK validations
+  --soft-red: #ef4444        → errors, anomalies, rejections
+  --warning-yellow: #eab308  → threshold warnings (palette attente)
+  --bg-primary               → page background
+  --bg-card                  → card backgrounds
+  --bg-secondary             → subtle areas
+  --bg-input                 → input fields
+  --text-primary             → main text
+  --text-secondary           → labels
+  --text-muted               → placeholders, metadata
+  --border-color             → default borders
+  --gradient-primary         → linear-gradient(135deg, #1e3a8a, #1e7cdc)
+  --gradient-danger          → linear-gradient(135deg, #ef4444, #f97316)
+  --gradient-success         → linear-gradient(135deg, #22c55e, #0fbda0)
+  --radius-md: 12px
+  --radius-lg: 20px
+  --shadow-md                → 0 4px 20px rgba(10,40,80,0.12)
+PDA-FIRST DESIGN RULES:
+  - All interactive elements: minimum 52px height
+  - Scan inputs: minimum 58px height, 1.125rem font, letter-spacing: 0.05em
+  - All buttons: font-weight: 700, touch-action: manipulation
+  - Success feedback: navigator.vibrate(60) + green animation
+  - Anomaly feedback: navigator.vibrate([200,100,200,100,400]) + red flash + modal
+  - Error feedback: navigator.vibrate([100,50,100])
+  - Use useScannerInput hook for ALL barcode inputs (keystroke speed &lt; 50ms = scanner)
+RESPONSIVE LAYOUT:
+  Mobile/PDA (&lt; 769px):
+    - Bottom navigation bar (72px height, fixed)
+    - Central FAB circle button (60px diameter) that expands to radial menu
+    - FAB items = the 3 most common actions for current user's module
+    - Single column layouts
+    - Large card grids (max 2 columns)
+  
+  Desktop PC (≥ 769px):
+    - Persistent collapsible sidebar (260px, collapses to 68px)
+    - Traditional top bar with user info
+    - Multi-column layouts (up to 4 columns for KPI cards)
+    - Split views available (traceability, chambre visuel)
+SCANNER INPUT COMPONENT PATTERN:
+  Every page that has a scan action MUST use this pattern:
+  
+  const scanner = useScannerInput({
+    onScan: async (code) =&gt; { await handleScan(code); },
+    minLength: 8,        // all barcodes are at least 8 chars
+    speedThreshold: 50,  // ms — PDA scanner fires &lt; 50ms between chars
+  });
+  
+  &lt;div className={styles.scannerWrapper}&gt;
+    &lt;div className={styles.scannerIcon}&gt;
+      {scanner.isScanning ? '📡' : '🔍'}
+    &lt;/div&gt;
+    &lt;input
+      className={`${styles.scannerInput} ${scanner.isScanning ? styles.scanning : ''}`}
+      placeholder=&quot;Scanner ou saisir le code&quot;
+      autoFocus
+      {...scanner.bindInput}
+    /&gt;
+    {scanner.scanned &amp;&amp; (
+      &lt;div className={styles.scanSuccess}&gt;✓ Code détecté&lt;/div&gt;
+    )}
+  &lt;/div&gt;
+OFFLINE QUEUE:
+  All data entry forms MUST handle offline:
+  const { isOnline, addToOfflineQueue } = useApp();
+  
+  If !isOnline at submit time:
+    → addToOfflineQueue({ module, action, data, timestamp })
+    → Show &quot;💾 Sauvegardé hors-ligne&quot; toast
+    → Auto-sync on reconnection
+LANGUAGE:
+  - Default: French
+  - Arabic toggle available (RTL)
+  - Every user-facing string must use t() from AppContext
+  - Add FR and AR translations for all new strings to AppContext
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 7 — FILE STRUCTURE TO PRODUCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/app/
+├── layout.tsx
+├── page.tsx                              (login with email OR matricule toggle)
+├── globals.css
+│
+├── (auth)/
+│   ├── register/page.tsx
+│   └── pending-approval/page.tsx
+│
+├── chambre/
+│   ├── layout.tsx                        (chambre module shell)
+│   ├── login/page.tsx                    (matricule scan)
+│   ├── menu/page.tsx
+│   ├── entree-palette/page.tsx
+│   ├── sortie-palette/page.tsx
+│   ├── visuel/page.tsx
+│   └── indicateurs/page.tsx
+│
+├── ligne/
+│   ├── layout.tsx
+│   ├── login/page.tsx
+│   ├── choix-ligne/page.tsx
+│   ├── chef-matricule/page.tsx
+│   ├── menu/page.tsx
+│   ├── entree-palette/page.tsx
+│   ├── sortie-chariot/page.tsx
+│   └── ticket-chariot/[id]/page.tsx      (printable ticket)
+│
+├── autoclave/
+│   ├── layout.tsx
+│   ├── login/page.tsx
+│   ├── menu/page.tsx
+│   ├── chargement/page.tsx
+│   ├── confirmation/page.tsx
+│   ├── cycles/page.tsx                   (running cycles list)
+│   ├── fin-cycle/[id]/page.tsx
+│   └── ticket-sterilisation/[id]/page.tsx (printable ticket)
+│
+├── emballage/
+│   ├── layout.tsx
+│   ├── login/page.tsx
+│   ├── demarrage/page.tsx
+│   ├── scan-ticket/page.tsx
+│   ├── saisie/page.tsx
+│   └── tracabilite/[ticketId]/page.tsx
+│
+├── dashboard/
+│   ├── layout.tsx                        (admin sidebar + FAB)
+│   ├── page.tsx                          (global KPIs)
+│   ├── floor-map/page.tsx
+│   ├── traceability/page.tsx             (universal search)
+│   ├── quality/page.tsx
+│   ├── reports/page.tsx
+│   └── super-admin/
+│       ├── page.tsx
+│       └── approvals/page.tsx
+│
+└── api/
+    ├── auth/
+    │   ├── login-matricule/route.ts
+    │   ├── login-email/route.ts
+    │   ├── register/route.ts
+    │   └── me/route.ts
+    ├── palettes/
+    │   ├── route.ts
+    │   └── [code]/
+    │       ├── route.ts
+    │       └── status/route.ts
+    ├── chambre/
+    │   ├── entree/route.ts
+    │   ├── sortie/route.ts
+    │   ├── stock/route.ts
+    │   ├── indicateurs/route.ts
+    │   └── alertes/route.ts
+    ├── ligne/
+    │   ├── entree-palette/route.ts
+    │   └── active/route.ts
+    ├── chariots/
+    │   ├── route.ts
+    │   └── [code]/route.ts
+    ├── autoclave/
+    │   ├── cycles/
+    │   │   ├── route.ts
+    │   │   └── [id]/
+    │   │       ├── route.ts
+    │   │       ├── end/route.ts
+    │   │       └── chariots/route.ts
+    │   └── tickets/[code]/route.ts
+    ├── emballage/
+    │   ├── start/route.ts
+    │   └── [id]/complete/route.ts
+    ├── ml/
+    │   ├── check-palette-weight/route.ts
+    │   ├── check-chariot-boxes/route.ts
+    │   ├── predict-sterilization/route.ts
+    │   ├── check-cycle-duration/route.ts
+    │   └── train-status/route.ts
+    ├── dashboard/
+    │   └── kpis/route.ts
+    ├── traceability/
+    │   └── search/route.ts
+    └── users/
+        ├── route.ts
+        ├── approve/route.ts
+        └── assign-module/route.ts
+src/components/
+├── TraceabilityMap.tsx + .module.css
+├── ScannerInput.tsx + .module.css        (reusable scanner component)
+├── TicketPrint.tsx + .module.css         (reusable print layout)
+├── MLBadge.tsx + .module.css             (AI verdict badge component)
+├── KPICard.tsx + .module.css
+├── PaletteCard.tsx + .module.css
+└── CountdownTimer.tsx + .module.css      (for autoclave cycle)
+src/hooks/
+├── useScannerInput.ts
+├── useAutoRefresh.ts                     (polling hook for live data)
+└── usePrintable.ts                       (window.print() with before/after hooks)
+src/context/
+└── AppContext.tsx                         (theme, lang, auth, offline queue,
+                                            module session: line/autoclave chosen)
+src/lib/
+├── jwt.ts
+├── barcodeGenerator.ts                   (generates PAL/CHR/STR codes)
+└── mlClient.ts                           (Python spawn + fallback wrapper)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 8 — PYTHON ML SERVICES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+python_services/
+├── validate.py           (IsolationForest — existing, keep)
+├── train.py              (model training — existing, keep)
+├── pattern_matcher.py    (existing, keep)
+├── weight_checker.py     (NEW — ML CHECK 1: palette weight anomaly)
+├── box_count_checker.py  (NEW — ML CHECK 2: chariot box count anomaly)
+├── duration_predictor.py (NEW — ML CHECK 3+4: sterilization duration)
+├── wait_predictor.py     (NEW — ML CHECK 5: palette wait time)
+└── requirements.txt      (keep existing + add scikit-learn if not there)
+Each Python service:
+  - Reads JSON from stdin
+  - Writes JSON result to stdout
+  - Handles missing model file gracefully (outputs rule-based result)
+  - Exits with code 0 always (errors go to stderr)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 9 — QUALITY CHECKLIST (verify before output)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Before delivering, verify every item:
+□ Every page has 'use client' if it uses hooks
+□ Every API route has try/catch/finally with prisma.$disconnect()
+□ Every API route checks Authorization header before proceeding
+□ Every form has both online and offline submit paths
+□ Every barcode input uses useScannerInput hook
+□ All haptic feedback patterns are implemented (60ms / [200,100,200,100,400])
+□ All ML checks have rule-based fallbacks
+□ All print pages have @media print CSS
+□ No hardcoded hex colors — only CSS variables
+□ No Tailwind classes — only CSS Modules
+□ No console.log in production code
+□ prisma/schema.prisma is valid and consistent
+□ All new models are indexed properly
+□ All translations added to both FR and AR in AppContext
+□ Bottom nav FAB is role-aware and module-aware
+□ Light mode is default, dark toggle works
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 10 — DELIVERABLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Produce a single zip: bkfood-v3-complete.zip
+The zip must:
+  1. Extract to folder: bkfood-v3-complete/
+  2. Contain EVERY file listed in Section 7
+  3. Have a valid prisma/schema.prisma
+  4. Have a complete .env.example
+  5. Have an updated package.json with all dependencies
+  6. Have a README.md with setup steps:
+       npm install
+       cp .env.example .env  (then fill DATABASE_URL + JWT_SECRET)
+       npx prisma generate
+       npx prisma db push
+       npm run dev
+  7. Pass: zip -T bkfood-v3-complete.zip  (no corruption)
+DO NOT:
+  - Leave any page as a stub or placeholder
+  - Use &quot;TODO&quot; comments in code
+  - Mock API responses — use real Prisma queries
+  - Skip the ML Python services
+  - Output just the changed files — output the COMPLETE project

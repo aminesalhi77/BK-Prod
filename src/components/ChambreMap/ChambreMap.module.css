@@ -1,0 +1,139 @@
+.chambreWrapper {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 3px solid #04da61;
+    width: fit-content;
+    margin: 0 auto;
+    position: relative;
+    user-select: none;
+}
+
+.door {
+    width: 80px;
+    height: 10px;
+    background: var(--text-secondary);
+    margin: 0 auto 2rem;
+    color: white;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+}
+
+.grid {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.side {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.corridor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 60px;
+    background: var(--border-color);
+    align-items: center;
+    justify-content: space-around;
+}
+
+.zoneMarker {
+    color: #ef4444;
+    /* Zones rouges */
+    font-weight: bold;
+    height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.position {
+    width: 80px;
+    height: 60px;
+    border: 1px solid #0909eb;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    padding: 2px;
+    position: relative;
+    cursor: default;
+    transition: all 0.2s;
+}
+
+.posLabel {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+.empty {
+    border-style: dashed;
+}
+
+.occupied {
+    background: #dcfce7;
+    border-color: #22c55e;
+}
+
+.alert {
+    animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+    0% {
+        background-color: #fee2e2;
+    }
+
+    50% {
+        background-color: #71a0f8;
+    }
+
+    100% {
+        background-color: #fee2e2;
+    }
+}
+
+.selected {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    z-index: 10;
+}
+
+.selectable {
+    cursor: pointer;
+}
+
+.selectable:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.paletteInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.code {
+    font-weight: bold;
+    font-size: 0.7rem;
+    color: var(--text-primary);
+}
+
+.type {
+    font-size: 0.55rem;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1;
+}

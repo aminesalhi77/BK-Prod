@@ -1,0 +1,45 @@
+{
+  "name": "bkfood-traceability-v3",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:lan": "next dev -H 0.0.0.0",
+    "dev:ai": "concurrently \"npm run dev\" \"python bkfood_ai/5_api_server.py\"",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "install:ai": "cd bkfood_ai && pip install -r requirements.txt"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "jose": "^5.2.4",
+    "jsbarcode": "^3.12.3",
+    "lucide-react": "^0.344.0",
+    "next": "^14.2.35",
+    "pg": "^8.18.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "tailwind-merge": "^2.2.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/pg": "^8.16.0",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "concurrently": "^9.2.1",
+    "prisma": "^7.4.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5"
+  }
+}

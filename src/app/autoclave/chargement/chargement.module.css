@@ -1,0 +1,165 @@
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.mainCard {
+    background-color: var(--bg-card);
+    padding: 2.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    max-width: 600px;
+    width: 100%;
+}
+
+.mainCard h2 {
+    color: var(--maritime-blue);
+    margin-bottom: 2rem;
+}
+
+.configGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.inputGroup label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.scannerSection {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.sectionHeader h3 {
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.totalBoxes {
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: var(--maritime-blue);
+}
+
+.scannerInputBox {
+    height: 60px;
+    border: 2px dashed var(--maritime-blue);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    background: rgba(30, 58, 138, 0.05);
+}
+
+.invisibleInput {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: default;
+}
+
+.pulseDot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--maritime-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--maritime-blue);
+    animation: pulse 2s infinite;
+}
+
+.scanningLabel {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--maritime-blue);
+    letter-spacing: 0.05em;
+}
+
+.manualInputSection {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.manualInputSection input {
+    flex: 1;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.listRow {
+    background: var(--bg-card);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    border: 1px solid var(--border-color);
+}
+
+.listRow button {
+    background: none;
+    border: none;
+    color: var(--soft-red);
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.error {
+    margin-top: 1rem;
+    color: var(--soft-red);
+    font-size: 0.875rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.4;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .configGrid {
+        grid-template-columns: 1fr;
+    }
+}

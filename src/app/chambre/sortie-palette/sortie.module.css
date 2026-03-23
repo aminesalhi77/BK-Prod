@@ -1,0 +1,185 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.formCard {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.instruction {
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.formGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.fieldGroup label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.fieldWithScan {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.fieldWithScan input {
+    flex: 1;
+}
+
+.scanIconBtn {
+    width: 50px;
+    height: 50px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    border-radius: 8px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanIconBtn:hover {
+    border-color: var(--maritime-blue);
+    background: #eff6ff;
+}
+
+.scanIconBtn.scanningActive {
+    border-color: var(--maritime-blue);
+    background: #dbeafe;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.scanMessage {
+    text-align: center;
+    color: var(--maritime-blue);
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    background: #dbeafe;
+    border-radius: 8px;
+    animation: pulse 1s infinite;
+}
+
+.destinationGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.destBtn {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.destBtn:hover {
+    border-color: var(--maritime-blue);
+    background: #eff6ff;
+}
+
+.destActive {
+    background: #3b82f6;
+    color: white;
+    border-color: #2563eb;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.resetBtn {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.resetBtn:hover {
+    background: var(--bg-secondary);
+}
+
+.cancelBtn {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.error {
+    margin-top: 1rem;
+    color: var(--soft-red);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 0.75rem;
+    background: #fef2f2;
+    border-radius: 8px;
+}
+
+.successCard {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.successIcon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 600px) {
+    .destinationGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

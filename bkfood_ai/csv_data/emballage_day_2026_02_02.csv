@@ -1,0 +1,5 @@
+﻿str_code,autoclave_id,article,total_boxes,cheffe_emballage_matricule,recorded_at,source_file
+STR-DR2GF4T3,Autoclave 5,Thon en Morceaux au Naturel,1670,5001,2026-02-02 12:37:21,production-day-2026-02-02.xlsx
+STR-GBM2ALGS,Autoclave 3,Thon Entier à l'Huile,3150,5002,2026-02-02 11:06:52,production-day-2026-02-02.xlsx
+STR-EUJT1Z4N,Autoclave 3,Thon Emietté à l'Huile,1112,5002,2026-02-02 14:09:23,production-day-2026-02-02.xlsx
+STR-XYQC4RKZ,Autoclave 3,Thon en Morceaux à l'Huile,3206,5001,2026-02-02 13:55:41,production-day-2026-02-02.xlsx

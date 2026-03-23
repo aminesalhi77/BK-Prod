@@ -1,0 +1,121 @@
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./src/app/(auth)/pending-approval/pending.module.css ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************/
+.pending_container__DdxId {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+}
+
+/* Banner with theme, language, and logout buttons */
+.pending_banner__b2SdE {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    background: transparent;
+    z-index: 10;
+}
+
+.pending_bannerActions__mX4uY {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pending_languageBtn__SuJ0W {
+    font-size: 30px;
+    background: white;
+    border: 1px solid var(--border-color);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(34, 0, 255, 0.826);
+}
+
+.pending_languageBtn__SuJ0W:hover {
+    background: darkblue;
+    transform: translateY(-7px);
+}
+.pending_themeBtn__XH1xU {
+    font-size: 30px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(242, 255, 0, 0.826);
+}
+
+.pending_themeBtn__XH1xU:hover {
+    background: rgb(198, 198, 3);
+    transform: translateY(-7px);
+}
+
+.pending_logoutBtn__j8RFJ {
+    font-size: 30px;
+    background: #ffffff;
+    color: white;
+    border: none;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.826);
+}
+
+.pending_logoutBtn__j8RFJ:hover {
+    background: red;
+    opacity: 0.9;
+    transform: translateY(-7px);
+}
+
+.pending_card__3Mn8b {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.pending_icon__u3gHR {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.pending_card__3Mn8b h1 {
+    font-size: 1.5rem;
+    color: var(--maritime-blue);
+    margin-bottom: 1rem;
+}
+
+.pending_card__3Mn8b p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+

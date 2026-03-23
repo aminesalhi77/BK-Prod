@@ -1,0 +1,318 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String      @id @default(cuid())
+  matricule      String      @unique
+  email          String?     @unique
+  password       String
+  name           String
+  role           UserRole    @default(WORKER)
+  isApproved     Boolean     @default(false)
+  assignedModule ModuleType?
+  createdAt      DateTime    @default(now())
+  approvedBy     String?
+  approvedAt     DateTime?
+}
+
+model Palette {
+  id                 String            @id @default(cuid())
+  code               String            @unique
+  batchCode          String
+  species            String
+  article            String
+  weightKg           Float
+  origin             String
+  status             PaletteStatus     @default(PARAGE_DONE)
+  notes              String?
+  entryTime          DateTime?
+  exitTime           DateTime?
+  destinationLine    String?
+  chambreWorkerId    String?
+  ligneWorkerId      String?
+  ligneId            String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  isWeightAnomaly    Boolean           @default(false)
+  weightAnomalyScore Float?
+  positionNumber     Int?
+  positionZone       String?
+  longeType          String?
+  lineEntries        LineEntry[]
+  movements          PaletteMovement[]
+
+  @@index([code])
+  @@index([status])
+  @@index([batchCode])
+}
+
+model PaletteMovement {
+  id              String   @id @default(cuid())
+  paletteId       String
+  fromStation     String
+  toStation       String
+  workerMatricule String
+  timestamp       DateTime @default(now())
+  notes           String?
+  palette         Palette  @relation(fields: [paletteId], references: [id])
+
+  @@index([paletteId])
+}
+
+model Chariot {
+  id                String                  @id @default(cuid())
+  code              String                  @unique
+  numero            String
+  article           String
+  boxCount          Int
+  estimatedWeight   Float?
+  status            ChariotStatus           @default(READY_FOR_AUTOCLAVE)
+  ligneId           String
+  cheffeMatricule   String
+  paletteId         String?
+  createdAt         DateTime                @default(now())
+  isBoxCountAnomaly Boolean                 @default(false)
+  autoclaveCycles   AutoclaveCycleChariot[]
+
+  @@index([code])
+  @@index([status])
+}
+
+model AutoclaveCycle {
+  id                   String                  @id @default(cuid())
+  autoclaveId          String
+  conducteurMatricule  String
+  assistantMatricule   String?
+  startTime            DateTime                @default(now())
+  endTime              DateTime?
+  actualDurationMin    Int?
+  predictedDurationMin Int?
+  status               CycleStatus             @default(RUNNING)
+  totalBoxes           Int                     @default(0)
+  totalWeightKg        Float?
+  isAnomaly            Boolean                 @default(false)
+  anomalyScore         Float?
+  anomalyFlags         String?
+  createdAt            DateTime                @default(now())
+  chariots             AutoclaveCycleChariot[]
+  sterilizationTicket  SterilizationTicket?
+
+  @@index([status])
+  @@index([autoclaveId])
+}
+
+model AutoclaveCycleChariot {
+  cycleId   String
+  chariotId String
+  chariot   Chariot        @relation(fields: [chariotId], references: [id])
+  cycle     AutoclaveCycle @relation(fields: [cycleId], references: [id])
+
+  @@id([cycleId, chariotId])
+}
+
+model SterilizationTicket {
+  id              String           @id @default(cuid())
+  code            String           @unique
+  cycleId         String           @unique
+  isAnomaly       Boolean          @default(false)
+  mlSummary       String?
+  status          TicketStatus     @default(READY_FOR_PACKAGING)
+  createdAt       DateTime         @default(now())
+  packagingRecord PackagingRecord?
+  cycle           AutoclaveCycle   @relation(fields: [cycleId], references: [id])
+
+  @@index([code])
+  @@index([status])
+}
+
+model LineEntry {
+  id              String   @id @default(cuid())
+  paletteId       String
+  ligneId         String
+  cheffeMatricule String
+  article         String
+  weightKg        Float
+  timestamp       DateTime @default(now())
+  palette         Palette  @relation(fields: [paletteId], references: [id])
+
+  @@index([paletteId])
+  @@index([ligneId])
+}
+
+model PackagingRecord {
+  id                    String              @id @default(cuid())
+  sterilizationTicketId String             @unique
+  cheffeMatricule       String
+  packagingLine         String
+  shift                String
+  actualBoxCount        Int
+  rejectedCount         Int                 @default(0)
+  startTime             DateTime            @default(now())
+  endTime              DateTime?
+  notes                String?
+  ticket               SterilizationTicket @relation(fields: [sterilizationTicketId], references: [id])
+
+  @@index([sterilizationTicketId])
+}
+
+model ColdStorageIndicator {
+  id              String   @id @default(cuid())
+  date            DateTime @default(now())
+  palettesIn      Int
+  palettesOut     Int
+  stockLevel      Int
+  avgStorageHours Float
+  occupancyPct    Float
+  mlForecast      Int?
+
+  @@index([date])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String?
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+model ChambreShift {
+  id                String    @id @default(cuid())
+  operatorMatricule String
+  chefTapis1        String
+  chefTapis2        String
+  chefTapis3        String
+  chefTapis4        String
+  startTime         DateTime  @default(now())
+  endTime           DateTime?
+  status            String    @default("ACTIVE")
+
+  @@index([operatorMatricule])
+  @@index([status])
+}
+
+model MLModel {
+  id           String   @id @default(cuid())
+  version      String
+  trainingDate DateTime @default(now())
+  algorithm    String   @default("IsolationForest")
+  accuracy     Float?
+  isActive     Boolean  @default(true)
+  modelPath    String
+  features     String?
+
+  @@index([isActive])
+}
+
+model WorkflowNotification {
+  id              String              @id @default(cuid())
+  type            NotificationType
+  title           String
+  message         String
+  recipientRole   UserRole
+  recipientModule ModuleType?
+  relatedEntity   String?
+  relatedId       String?
+  isRead          Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+  readAt          DateTime?
+  expiresAt       DateTime?
+  priority        NotificationPriority @default(MEDIUM)
+
+  @@index([recipientRole])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([type])
+}
+
+model WorkflowStep {
+  id              String              @id @default(cuid())
+  name            String
+  description     String?
+  fromModule      ModuleType
+  toModule        ModuleType
+  triggerEvent    String
+  isActive        Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([fromModule])
+  @@index([toModule])
+  @@index([isActive])
+}
+
+enum UserRole {
+  WORKER
+  RESPONSABLE_CONDITIONNEMENT
+  ADMIN_PRODUCTION
+  SUPER_ADMIN_IT
+  ADMIN
+  SUPER_ADMIN
+  CHEF_LIGNE
+  CHEFFE_TAPIS
+}
+
+enum ModuleType {
+  CHAMBRE
+  LIGNE
+  AUTOCLAVE
+  EMBALLAGE
+  ADMIN
+}
+
+enum PaletteStatus {
+  PARAGE_DONE
+  IN_CHAMBRE
+  CHAMBRE_ALERT
+  SENT_TO_LIGNE
+  IN_LIGNE
+  CONSUMED
+}
+
+enum ChariotStatus {
+  READY_FOR_AUTOCLAVE
+  IN_AUTOCLAVE
+  STERILIZED
+  IN_PACKAGING
+  DONE
+}
+
+enum CycleStatus {
+  RUNNING
+  COMPLETED
+  ANOMALY
+}
+
+enum TicketStatus {
+  READY_FOR_PACKAGING
+  IN_PACKAGING
+  PACKAGING_COMPLETE
+}
+
+enum NotificationType {
+  PALETTE_READY_FOR_LIGNE
+  CHARIOT_READY_FOR_AUTOCLAVE
+  CYCLE_COMPLETE_FOR_PACKAGING
+  WORKFLOW_STEP_COMPLETED
+  SYSTEM_ALERT
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+

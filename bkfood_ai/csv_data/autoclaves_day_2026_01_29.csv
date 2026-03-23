@@ -1,0 +1,4 @@
+﻿cycle_id,autoclave_id,conducteur_matricule,assistant_matricule,start_time,end_time,duration_minutes,chariot_codes,str_code,source_file
+CYC-5LD12RQD,Autoclave 1,4003,4004,2026-01-29 11:36:06,2026-01-29 13:00:06,84,"CHR-CAPWQZOR, CHR-NSYL7HUN, CHR-5Q1EHQGH, CHR-KFG3ETM2",STR-3MWAXJ5G,production-day-2026-01-29.xlsx
+CYC-E12QN8M2,Autoclave 4,4003,4005,2026-01-29 11:40:36,2026-01-29 12:36:36,56,"CHR-SJESZIHF, CHR-6F4T89J7, CHR-2YTFEMUS, CHR-TZWM8Z8B",STR-C6BNIMNR,production-day-2026-01-29.xlsx
+CYC-BGQF4TH0,Autoclave 1,4002,4005,2026-01-29 13:37:05,2026-01-29 14:49:05,72,"CHR-F9KGXX75, CHR-OT8VQX9H, CHR-CEZXL4YI, CHR-HOT5GE4T",STR-0BJC6ZQN,production-day-2026-01-29.xlsx

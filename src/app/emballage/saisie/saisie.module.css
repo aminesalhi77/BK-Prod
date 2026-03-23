@@ -1,0 +1,102 @@
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    max-width: 500px;
+    width: 100%;
+}
+
+.instruction {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.scannerWrapper {
+    position: relative;
+}
+
+.scannerIcon {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+}
+
+.manualInputSection {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.manualInputSection input {
+    flex: 1;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.badge {
+    background-color: var(--bg-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    color: var(--maritime-blue);
+    font-size: 0.875rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.inputGroup label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.cancelBtn {
+    background: none;
+    border: 1px solid var(--border-color);
+    height: var(--pda-btn-height);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.error {
+    color: var(--soft-red);
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.successCard {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.successIcon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}

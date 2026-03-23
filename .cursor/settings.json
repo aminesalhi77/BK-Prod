@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "notion-workspace": {
+      "enabled": true
+    },
+    "figma": {
+      "enabled": true
+    },
+    "huggingface-skills": {
+      "enabled": true
+    }
+  }
+}

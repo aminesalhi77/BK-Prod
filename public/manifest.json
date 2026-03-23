@@ -1,0 +1,16 @@
+{
+    "name": "BK FOOD Traceability",
+    "short_name": "BK Food",
+    "description": "Smart traceability system for tuna canning factory",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1e3a8a",
+    "icons": [
+        {
+            "src": "/logo-bk.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}

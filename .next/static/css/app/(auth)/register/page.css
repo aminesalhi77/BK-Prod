@@ -1,0 +1,73 @@
+/*!***************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./src/app/(auth)/register/register.module.css ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************/
+.register_container__Efe6m {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+}
+
+.register_registerBox__6FIZH {
+    width: 100%;
+    max-width: 480px;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.register_header__G6I17 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.register_header__G6I17 h1 {
+    font-size: 1.75rem;
+    color: var(--maritime-blue);
+    font-weight: 800;
+}
+
+.register_form__n0G5m {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.register_inputGroup__NRC0e {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.register_label__bBbLo {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.register_errorBanner__nO5y3 {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--soft-red);
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.register_footer__xiwvu {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.register_footerLink__Tode1 {
+    background: none;
+    border: none;
+    color: var(--maritime-blue);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
