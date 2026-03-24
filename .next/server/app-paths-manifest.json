@@ -1,9 +1,0 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/page": "app/page.js",
-  "/(auth)/pending-approval/page": "app/(auth)/pending-approval/page.js",
-  "/api/notifications/stream/route": "app/api/notifications/stream/route.js",
-  "/admin/dashboard/page": "app/admin/dashboard/page.js",
-  "/dashboard/admin/page": "app/dashboard/admin/page.js",
-  "/dashboard/reports/page": "app/dashboard/reports/page.js"
-}
